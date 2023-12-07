@@ -1,7 +1,7 @@
 program main
       implicit none
       real(kind= 8), allocatable :: matrix_a(:,:), matrix_l(:,:), matrix_u(:,:)
-      integer :: n ! dimension matrix
+      integer :: n, n_wilkin
       real(kind=8) :: g
       character(len=3) :: response
       character(len=30) :: type_matrix
@@ -25,4 +25,10 @@ program main
       allocate (matrix_l(n,n),matrix_u(n,n))
       call lufact(matrix_a,matrix_l,matrix_u,g,n,type_matrix)
       deallocate(matrix_a,matrix_l,matrix_u)
+!
+      write(*,*) 'What is the size of the matrix Wilkinson?'
+      read(*,*) n_wilkin
+      allocate(matrix_a(n_wilkin,n_wilkin))
+      call wilkin(n_wilkin,matrix_a)
+      deallocate(matrix_a)
       end program 

@@ -5,13 +5,14 @@ file_list=$(ls *.f95)
 
 # Compila tutti i file .f95
 #gfortran -o main $file_list
-gfortran -fcheck=all -Wall -g -fbacktrace -o main $file_list
+#gfortran -fcheck=all -Wall -g -fbacktrace -o main $file_list 
+gfortran -fcheck=all -Wall -g -fbacktrace -o main $file_list -llapack -lblas
 # Controlla se la compilazione è riuscita
 if [ $? -eq 0 ]; then
   echo "Compilazione completata con successo."
   # Esegui l'eseguibile
   ./main
-  vim factLU.txt
+#  vim factLU.txt
 
 else
   echo "Errore durante la compilazione."
