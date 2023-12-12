@@ -1,1 +1,5 @@
+<<<<<<< HEAD
 # AnalisiNumerica
+=======
+# AnalisiNumerica
+>>>>>>> master

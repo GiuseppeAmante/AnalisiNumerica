@@ -2,7 +2,6 @@ program main
       implicit none
       real(kind= 8), allocatable :: matrix_a(:,:), matrix_l(:,:), matrix_u(:,:)
       integer :: n, n_wilkin
-      real(kind=8) :: g
       character(len=3) :: response
       character(len=30) :: type_matrix
 !   
@@ -23,7 +22,7 @@ program main
 !        the upper triangular factor U, and
 !        the growth factor g (defined here as the larger entry in the matrix G= |L||U|, divided by the largest entry in |A|)
       allocate (matrix_l(n,n),matrix_u(n,n))
-      call lufact(matrix_a,matrix_l,matrix_u,g,n,type_matrix)
+      call lufact(matrix_a,matrix_l,matrix_u,n,type_matrix)
       deallocate(matrix_a,matrix_l,matrix_u)
 !
       write(*,*) 'What is the size of the matrix Wilkinson?'
