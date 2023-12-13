@@ -24,7 +24,7 @@ subroutine generation_matrix(matrix_a,n,response)
           do j = 1, n
             if (i /= j) then
                 val = matrix_a(i, i)+matrix_a(i,i)
-                matrix_a(i, j) = sqrt(val)/real(i+i)
+                matrix_a(i, j) = sqrt(val)/real(i+j)
             end if
           enddo
         enddo
@@ -53,7 +53,7 @@ subroutine generation_matrix(matrix_a,n,response)
     else if (trim(response) == 'vandermode') then
         allocate(x(n))
         do i = 1, n
-          x(i) = real(i-1)
+          x(i) = real(i)
         enddo
         matrix_a = one
         do i = 1, n
@@ -62,7 +62,7 @@ subroutine generation_matrix(matrix_a,n,response)
           end do
         end do
     else 
-        write(*,*) 'Error!' 
+        write(*,*) 'No matrix generated'
         stop  
     endif
     end subroutine

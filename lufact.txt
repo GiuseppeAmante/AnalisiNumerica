@@ -1,18 +1,21 @@
+Welcome to LU factorization without pivoting.
 ***********************************************************
                        M A T R I X                         
                                                           
 ==============================
   number of rows        :    3
   number of colons      :    3
-  type of matrix        :pascal                        
+  type of matrix        :A.matrix                      
 ==============================
                                                           
-     1.0000000     0.0000000     0.0000000
-     1.0000000     1.0000000     0.0000000
-     1.0000000     2.0000000     1.0000000
+     2.0000000     1.0000000     2.0000000
+     3.0000000     1.0000000     2.0000000
+     1.0000000     1.0000000     1.0000000
 ***********************************************************
                                                           
                                                           
+Pivot control passed.
+Control on machine precision value passed.
 ***********************************************************
                        M A T R I X                         
                                                           
@@ -23,8 +26,8 @@
 ==============================
                                                           
      1.0000000     0.0000000     0.0000000
-     1.0000000     1.0000000     0.0000000
-     1.0000000     2.0000000     1.0000000
+     1.5000000     1.0000000     0.0000000
+     0.5000000    -1.0000000     1.0000000
 ***********************************************************
                                                           
                                                           
@@ -37,57 +40,26 @@
   type of matrix        :Upper Triangular              
 ==============================
                                                           
-     1.0000000     0.0000000     0.0000000
-     0.0000000     1.0000000     0.0000000
-     0.0000000     0.0000000     1.0000000
+     2.0000000     1.0000000     2.0000000
+     0.0000000    -0.5000000    -1.0000000
+     0.0000000     0.0000000    -1.0000000
 ***********************************************************
                                                           
                                                           
- Maxval matrix G = |L| x |U|               :   2.0000000000000000     
- Maxval matrix |A|                         :   2.0000000000000000     
- Growth factor (my implementation LU)  is  :   1.0000000000000000     
-***********************************************************
-                       M A T R I X                         
-                                                          
-==============================
-  number of rows        :    3
-  number of colons      :    3
-  type of matrix        : A - LU                       
-==============================
-                                                          
-     0.0000000     0.0000000     0.0000000
-     0.0000000     0.0000000     0.0000000
-     0.0000000     0.0000000     0.0000000
-***********************************************************
-                                                          
-                                                          
+ Maxval matrix G = |L| x |U|               :   3.0000000000000000     
+ Maxval matrix |A|                         :   3.0000000000000000     
+ Growth factor (without pivoting) is       :   1.0000000000000000     
  Norm inf A - LU                           :   0.0000000000000000     
- Norm inf A                                :   4.0000000000000000     
- Norm inf A - LU/ Norm inf A               :   0.0000000000000000     
-Error in my implementation LU, file: lufact.f95
-Division by a quantity smaller than machine precision for NORWISE RELATIVE BACKWARD ERROR
- max_diff confronta con Norm inf A-LU   0.0000000000000000     
+ Norm inf A                                :   6.0000000000000000     
+Error : Division by a quantity smaller than machine precision for NORWISE RELATIVE BACKWARD ERROR
+Goodbye from factorization LU without pivoting
 =====================================================================
-                 ANALYSIS STEP BY STEP FACTORIZZATION LU
+                 ANALYSIS STEP BY STEP LU FACTORIZATION
 =====================================================================
- ---Matrix that composes A---
-   1.0000000000000000        0.0000000000000000        0.0000000000000000     
-   0.0000000000000000        1.0000000000000000        0.0000000000000000     
-   0.0000000000000000        2.0000000000000000        1.0000000000000000     
- ----------------------------
- at Step           1   growth factor  :   1.0000000000000000     
- ---Matrix that composes A---
-   1.0000000000000000        0.0000000000000000        0.0000000000000000     
-   0.0000000000000000        1.0000000000000000        0.0000000000000000     
-   0.0000000000000000        2.0000000000000000        1.0000000000000000     
- ----------------------------
-   1.0000000000000000        0.0000000000000000        0.0000000000000000     
-   0.0000000000000000        1.0000000000000000        0.0000000000000000     
-   0.0000000000000000        0.0000000000000000        1.0000000000000000     
- ----------------------------
- at Step           2   growth factor  :  0.50000000000000000     
+ at Step           1   growth factor  :  0.66666666666666663     
+ at Step           2   growth factor  :  0.66666666666666663     
 =====================================================================
-          LAPACK: FACTORIZZATION LU (wth partial pivoting)
+           LAPACK: LU factorization with partial pivoting
 =====================================================================
 ***********************************************************
                        M A T R I X                         
@@ -95,28 +67,12 @@ Division by a quantity smaller than machine precision for NORWISE RELATIVE BACKW
 ==============================
   number of rows        :    3
   number of colons      :    3
-  type of matrix        :Matrix before dgetrf[LAPACK]  
+  type of matrix        :A.matrix                      
 ==============================
                                                           
-     1.0000000     0.0000000     0.0000000
-     1.0000000     1.0000000     0.0000000
-     1.0000000     2.0000000     1.0000000
-***********************************************************
-                                                          
-                                                          
- DGETRF: successful exit!
-***********************************************************
-                       M A T R I X                         
-                                                          
-==============================
-  number of rows        :    3
-  number of colons      :    3
-  type of matrix        :Matrix after dgetrf[LAPACK]   
-==============================
-                                                          
-     1.0000000     0.0000000     0.0000000
-     1.0000000     2.0000000     1.0000000
-     1.0000000     0.5000000    -0.5000000
+     2.0000000     1.0000000     2.0000000
+     3.0000000     1.0000000     2.0000000
+     1.0000000     1.0000000     1.0000000
 ***********************************************************
                                                           
                                                           
@@ -126,12 +82,12 @@ Division by a quantity smaller than machine precision for NORWISE RELATIVE BACKW
 ==============================
   number of rows        :    3
   number of colons      :    3
-  type of matrix        :Lower Triangular - LAPACK     
+  type of matrix        :Lower Triangular [LAPACK]     
 ==============================
                                                           
      1.0000000     0.0000000     0.0000000
-     1.0000000     1.0000000     0.0000000
-     1.0000000     0.5000000     1.0000000
+     0.3333333     1.0000000     0.0000000
+     0.6666667     0.5000000     1.0000000
 ***********************************************************
                                                           
                                                           
@@ -141,19 +97,21 @@ Division by a quantity smaller than machine precision for NORWISE RELATIVE BACKW
 ==============================
   number of rows        :    3
   number of colons      :    3
-  type of matrix        :Upper Triangular - LAPACK     
+  type of matrix        :Upper Triangular [LAPACK]     
 ==============================
                                                           
-     1.0000000     0.0000000     0.0000000
-     0.0000000     2.0000000     1.0000000
-     0.0000000     0.0000000    -0.5000000
+     3.0000000     1.0000000     2.0000000
+     0.0000000     0.6666667     0.3333333
+     0.0000000     0.0000000     0.5000000
 ***********************************************************
                                                           
                                                           
- Maxval matrix |U|                         :   2.0000000000000000     
- Maxval matrix |A|                         :   2.0000000000000000     
- Growth factor (wth partial pivoting)  is  :   1.0000000000000000     
- Norm inf A - LU                           :   2.0000000000000000     
- Norm inf A                                :   4.0000000000000000     
- Norm inf A - LU/ Norm inf A               :  0.50000000000000000     
- Normwise relative backward error is       :  0.50000000000000000     
+ Maxval matrix |U|                         :   3.0000000000000000     
+ Maxval matrix |A|                         :   3.0000000000000000     
+ Growth factor (with partial pivoting)  is :   1.0000000000000000     
+ Norm inf A - LU                           :   3.0000000000000000     
+ Norm inf A - LU  [LAPACK]                 :   3.0000000000000000     
+ Norm inf A                                :   6.0000000000000000     
+ Norm inf A  [LAPACK]                      :   6.0000000000000000     
+ Reciprocal of the condition number of the matrix A.matrix                      is :   1.3888888888888888E-002
+ Normwise relative backward error (with partial pivoting) is :   0.50000000000000000     

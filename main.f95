@@ -1,33 +1,56 @@
 program main
       implicit none
-      real(kind= 8), allocatable :: matrix_a(:,:), matrix_l(:,:), matrix_u(:,:)
-      integer :: n, n_wilkin
+      real(kind= 8), allocatable :: matrix_a(:,:)
+      integer :: n, n_wilkin, success, i, j
       character(len=3) :: response
       character(len=30) :: type_matrix
 !   
-      write(*,*) 'Do you have a matrix available?'
+      write(*,*) 'Welcome to my program, I am Giuseppe Amante. '
+      write(*,*) 'This program solves exercises on linear system solutions (NLA Homework Project 1)'
+      write(*,*) 'Starting !'
+!START:1      
+      write(*,*) 'Problem 1 :'
+      write(*,*) 'Do you have a matrix available? [yes, no]'
       read(*,*) response
       if (trim(response) == 'yes') then
-           !read 
+        write(*,*) "Enter the name of the file containing the matrix (make sure it is square) :"
+        read(*,*) type_matrix
+        open(unit=10, file=trim(type_matrix), status='old', action='read', iostat=success)
+        if (success .ne. 0) then
+          write(*,*) "Error in opening the file."
+          write(*,*) "Remember: Create a file and insert the elements of a matrix inside"  
+          stop
+        end if
+        n=0 
+        do
+          read(10, *, iostat=success) 
+          if (success .ne. 0) then
+            exit
+          else
+            n = n + 1
+          end if
+        enddo
+        rewind(unit=10)
+        allocate(matrix_a(n,n))
+        do i = 1, n
+          read(10,*) (matrix_a(i,j), j =1 , n)
+      enddo
+        close(10)
       else if (trim(response) == 'no') then
            write(*,*) 'What is the size of the matrix you want to factorize?'
            read (*,*) n
            allocate(matrix_a(n,n)) 
            call generation_matrix(matrix_a,n,type_matrix)
       endif
-! Subroutine lufact() computes the LU fattorization of a non-singular nxn matrix A without pivoting        
-!    lufact(A,L,U,g)
-! where, takes A as input and 
-!        returns the unit lower triangular factor L,
-!        the upper triangular factor U, and
-!        the growth factor g (defined here as the larger entry in the matrix G= |L||U|, divided by the largest entry in |A|)
-      allocate (matrix_l(n,n),matrix_u(n,n))
-      call lufact(matrix_a,matrix_l,matrix_u,n,type_matrix)
-      deallocate(matrix_a,matrix_l,matrix_u)
-!
+!END:1      
+      call lufact(matrix_a,n,type_matrix)
+      deallocate(matrix_a)
+!START 2
+      write(*,*) 'Problem 2 :'
       write(*,*) 'What is the size of the matrix Wilkinson?'
       read(*,*) n_wilkin
       allocate(matrix_a(n_wilkin,n_wilkin))
       call wilkin(n_wilkin,matrix_a)
       deallocate(matrix_a)
+!END:2      
       end program 
