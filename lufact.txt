@@ -5,12 +5,12 @@ Welcome to LU factorization without pivoting.
 ==============================
   number of rows        :    3
   number of colons      :    3
-  type of matrix        :A.matrix                      
+  type of matrix        :hilbert                       
 ==============================
                                                           
-     2.0000000     1.0000000     2.0000000
-     3.0000000     1.0000000     2.0000000
-     1.0000000     1.0000000     1.0000000
+     1.0000000     0.5000000     0.3333333
+     0.5000000     0.3333333     0.2500000
+     0.3333333     0.2500000     0.2000000
 ***********************************************************
                                                           
                                                           
@@ -26,8 +26,8 @@ Control on machine precision value passed.
 ==============================
                                                           
      1.0000000     0.0000000     0.0000000
-     1.5000000     1.0000000     0.0000000
-     0.5000000    -1.0000000     1.0000000
+     0.5000000     1.0000000     0.0000000
+     0.3333333     1.0000000     1.0000000
 ***********************************************************
                                                           
                                                           
@@ -40,24 +40,24 @@ Control on machine precision value passed.
   type of matrix        :Upper Triangular              
 ==============================
                                                           
-     2.0000000     1.0000000     2.0000000
-     0.0000000    -0.5000000    -1.0000000
-     0.0000000     0.0000000    -1.0000000
+     1.0000000     0.5000000     0.3333333
+     0.0000000     0.0833333     0.0833333
+     0.0000000     0.0000000     0.0055556
 ***********************************************************
                                                           
                                                           
- Maxval matrix G = |L| x |U|               :   3.0000000000000000     
- Maxval matrix |A|                         :   3.0000000000000000     
- Growth factor (without pivoting) is       :   1.0000000000000000     
+ Maxval matrix G = |L| x |U|               :   1.0000000000000004     
+ Maxval matrix |A|                         :   1.0000000000000000     
+ Growth factor (without pivoting) is       :   1.0000000000000004     
  Norm inf A - LU                           :   0.0000000000000000     
- Norm inf A                                :   6.0000000000000000     
+ Norm inf A                                :   1.8333333333333333     
 Error : Division by a quantity smaller than machine precision for NORWISE RELATIVE BACKWARD ERROR
 Goodbye from factorization LU without pivoting
 =====================================================================
                  ANALYSIS STEP BY STEP LU FACTORIZATION
 =====================================================================
- at Step           1   growth factor  :  0.66666666666666663     
- at Step           2   growth factor  :  0.66666666666666663     
+ at Step           1   growth factor  :   1.0000000000000000     
+ at Step           2   growth factor  :   1.0000000000000000     
 =====================================================================
            LAPACK: LU factorization with partial pivoting
 =====================================================================
@@ -67,12 +67,12 @@ Goodbye from factorization LU without pivoting
 ==============================
   number of rows        :    3
   number of colons      :    3
-  type of matrix        :A.matrix                      
+  type of matrix        :hilbert                       
 ==============================
                                                           
-     2.0000000     1.0000000     2.0000000
-     3.0000000     1.0000000     2.0000000
-     1.0000000     1.0000000     1.0000000
+     1.0000000     0.5000000     0.3333333
+     0.5000000     0.3333333     0.2500000
+     0.3333333     0.2500000     0.2000000
 ***********************************************************
                                                           
                                                           
@@ -87,7 +87,7 @@ Goodbye from factorization LU without pivoting
                                                           
      1.0000000     0.0000000     0.0000000
      0.3333333     1.0000000     0.0000000
-     0.6666667     0.5000000     1.0000000
+     0.5000000     1.0000000     1.0000000
 ***********************************************************
                                                           
                                                           
@@ -100,18 +100,18 @@ Goodbye from factorization LU without pivoting
   type of matrix        :Upper Triangular [LAPACK]     
 ==============================
                                                           
-     3.0000000     1.0000000     2.0000000
-     0.0000000     0.6666667     0.3333333
-     0.0000000     0.0000000     0.5000000
+     1.0000000     0.5000000     0.3333333
+     0.0000000     0.0833333     0.0888889
+     0.0000000     0.0000000    -0.0055556
 ***********************************************************
                                                           
                                                           
- Maxval matrix |U|                         :   3.0000000000000000     
- Maxval matrix |A|                         :   3.0000000000000000     
+ Maxval matrix |U|                         :   1.0000000000000000     
+ Maxval matrix |A|                         :   1.0000000000000000     
  Growth factor (with partial pivoting)  is :   1.0000000000000000     
- Norm inf A - LU                           :   3.0000000000000000     
- Norm inf A - LU  [LAPACK]                 :   3.0000000000000000     
- Norm inf A                                :   6.0000000000000000     
- Norm inf A  [LAPACK]                      :   6.0000000000000000     
- Reciprocal of the condition number of the matrix A.matrix                      is :   1.3888888888888888E-002
- Normwise relative backward error (with partial pivoting) is :   0.50000000000000000     
+ Norm inf A - LU                           :  0.29999999999999999     
+ Norm inf A - LU  [LAPACK]                 :  0.29999999999999999     
+ Norm inf A                                :   1.8333333333333333     
+ Norm inf A  [LAPACK]                      :   1.8333333333333333     
+ Reciprocal of the condition number of the matrix hilbert                       is :   7.4805194805194805E-002
+ Normwise relative backward error (with partial pivoting) is :   0.16363636363636364     
