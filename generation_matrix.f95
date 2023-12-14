@@ -4,11 +4,11 @@ subroutine generation_matrix(matrix_a,n,response)
     real(kind=8), allocatable :: x(:)
     integer :: n, i ,j
     real(kind=8), parameter :: zero=0.0d0, one = 1.0d0
-    real(kind=8) :: conv, val, row_sum
-    character(len=30), intent(out) :: response
+    real(kind=8) :: conv, row_sum
+    character(len=10), intent(out) :: response
 !
     write(*,*) 'What type of square matrix do you want to generate?'
-    write(*,*) '[hilbert, diagonally dominant, pascal, vandermode]'
+    write(*,*) '[hilbert, diagonally dominant, pascal, vandermode, toeplitz]'
     read(*,*) response
     if (trim(response) == 'hilbert') then
         ! Hilbert matrix h_ij = 1/i+j-1
@@ -20,11 +20,10 @@ subroutine generation_matrix(matrix_a,n,response)
         enddo
     else if (trim(response) == 'diagonallydominant') then
         do i = 1, n
-          matrix_a(i, i) = 2.0d0
+          matrix_a(i, i) = 10.0d0
           do j = 1, n
             if (i /= j) then
-                val = matrix_a(i, i)+matrix_a(i,i)
-                matrix_a(i, j) = sqrt(val)/real(i+j)
+                matrix_a(i, j) = sqrt(10.0d0)/real(i+j)
             end if
           enddo
         enddo
@@ -38,6 +37,7 @@ subroutine generation_matrix(matrix_a,n,response)
           end do
           if ( row_sum > abs( matrix_a(i, i) ) ) then
             write(*, *) 'The matrix is not diagonally dominant!'
+            stop
           end if
         end do
     else if (trim(response) == 'pascal') then
@@ -61,6 +61,18 @@ subroutine generation_matrix(matrix_a,n,response)
             matrix_a(i, j) = x(i)**(j-1)
           end do
         end do
+        deallocate(x)
+    else if (trim(response) == 'vandermode') then
+        allocate(x(n))
+        do i = 1, n
+          x(i) = real(i)
+        enddo
+        do i = 1, n
+          do j = 1, n
+            matrix_a(i, j) = x(abs(i-j) + 1)
+          end do
+        end do
+        deallocate(x)
     else 
         write(*,*) 'No matrix generated'
         stop  

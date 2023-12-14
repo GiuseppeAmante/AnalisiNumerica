@@ -1,9 +1,9 @@
-subroutine lu_step(step,n,A,pivot_null,A_k)
+subroutine lu_step(step,n,A,pivot_null,machine_prec,A_k)
     implicit none
     integer :: n, step
     real(kind=8), dimension(n,n), intent(in) :: A
     real(kind=8), dimension(n,n), intent(out) :: A_k
-    logical :: pivot_null
+    logical :: pivot_null, machine_prec
 !
     real(kind=8), parameter :: one=1.0d0, zero=0.0d0
     real(kind=8) :: mach_precision
@@ -22,21 +22,23 @@ subroutine lu_step(step,n,A,pivot_null,A_k)
     do k = 1, step
 !control: Pivoting Null  
       if (A_k(k,k).eq.zero) then
-          pivot_null = .TRUE.
+        pivot_null = .TRUE.
         exit
       endif
 !      
       do i = k + 1, n
         M(i, k) = A_k(i, k) / A_k(k, k)
-        if ( abs(M(i,k)) < mach_precision ) then 
-          write(1,'(A)') 'Error : Division by a quantity smaller than machine precision'  
+!control: machine precision        
+        if ( abs(A_k(k,k)) < mach_precision ) then 
+          machine_prec = .TRUE.
+          exit 
         endif
         do j = k, n
           A_k(i, j) = A_k(i, j) - M(i, k) * A_k(k, j)
         end do
       end do
       A_step(:, :, k) = A_k
-    end do
+    end do 
 
     !write(1,*)  '---Matrix that composes A---'
     !do k = 1, step
