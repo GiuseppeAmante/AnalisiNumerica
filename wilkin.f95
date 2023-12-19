@@ -1,10 +1,14 @@
 subroutine wilkin(n,matrix)
     implicit none
     real(kind=8), dimension(n,n) :: matrix
-    integer :: n, i , j, ierr, info
-    real(kind=8) :: error_norm, rmse, mach_precision, s, error_relative
+    integer :: n
+!    
+    integer :: i , j, ierr, info
+    real(kind=8) :: s, rmse, mach_precision, error_relative,&
+        backward_error, norm_1, norm_2, backward_error_ge
     character(len=30) :: type_matrix
-    real(kind=8), allocatable :: e(:), b(:), y(:), x(:), L(:,:), U(:,:), x_ge(:)
+    real(kind=8), allocatable :: e(:), b(:), y(:), x(:), L(:,:), U(:,:),&
+        x_ge(:), work_1(:), work_2(:), copy(:,:)
     integer, allocatable :: pivots(:)
     real(kind=8), parameter :: zero = 0.0d0, one=1.0d0
 !
@@ -61,14 +65,14 @@ do i = 2, n
   end do
   y(i) = b(i) - s
 end do
-deallocate(b)
+!deallocate(b)
 !Ux=y  
     !x = y
     !deallocate(y)
     !outler_loop: do i = n,1,-1
     !  if (abs( U(i,i) ) < mach_precision) then
     !    write(2,'(A)') 'Error: Division by a quantity smaller than machine precision for Ux=y'    
-    !    exit outler_loop
+!    exit outler_loop
     !  else
     !      x(i) = x(i) / U(i,i)
     !  endif
@@ -91,20 +95,33 @@ deallocate(y)
     !  write(2,*) x(i)
     !enddo 
     deallocate(L,U)
-    error_norm = sqrt( sum((x-e)**2) )
-    rmse = sqrt( sum( (x-e)**2 ) / real(n) )
-    write(2,*) 'GE Euclidean Norm of the Error (x - e) is :', error_norm
-    write(2,*) 'GE Root Mean Square (x - e)            is :', rmse
+    allocate(work_1(n),work_2(n))
+    work_1 = zero
+    work_2 = zero
+! work = Ax
+    call dgemv('n',n,n,one,matrix,n,x,1,zero,work_1,1)
+    work_2 = work_1 - b 
+    call norm_inf_vector(work_2,n,norm_1)
+    call norm_inf_vector(b,n,norm_2)
+    backward_error_ge = norm_1 / norm_2
+    deallocate(b,work_1,work_2)
+    rmse = sqrt( sum( (x-e)**2 ) / real(n, kind=8) )
+    write(2,*) 'GE Root Mean Square                    is :', rmse
+    write(2,*) 'GE Backward error                      is :', backward_error_ge
     allocate(x_ge(n))
     x_ge = x
     deallocate(e,x)
     !
-    allocate(e(n),x(n))
+    allocate(e(n),b(n),x(n))
     e = one
     x = zero
+    b = zero
     call dgemv('n',n,n,one,matrix,n,e,1,zero,x,1)
     allocate(pivots(n))
-    call dgesv(n,1,matrix,n,pivots,x,n,info)
+    allocate(copy(n,n))
+    copy = matrix
+    b = x
+    call dgesv(n,1,copy,n,pivots,x,n,info)
     if (info .eq. 0) then
         write(2,'(A)') ' The Linear Equation System: successful !'
     else
@@ -114,12 +131,22 @@ deallocate(y)
     !do i = 1, n 
     !  write(2,*) x(i)
     !enddo 
-    error_norm = sqrt( sum((x-e)**2) )
+    deallocate(copy)
+    allocate(work_1(n),work_2(n))
+    work_1 = zero
+    work_2 = zero
+! work = Ax
+    call dgemv('n',n,n,one,matrix,n,x,1,zero,work_1,1)
+    work_2 = work_1 - b 
+    call norm_inf_vector(work_2,n,norm_1)
+    call norm_inf_vector(b,n,norm_2)
+    deallocate(b,work_1,work_2)
+    backward_error = norm_1 / norm_2
     rmse = sqrt( sum( (x-e)**2 ) / real(n, kind=8) )
-    write(2,*) 'GEPP Euclidean Norm of the Error (x - e)   is :', error_norm
-    write(2,*) 'GEPP Root Mean Square (x - e)              is :', rmse
-    error_relative = sqrt(sum((x-x_ge)**2)) / sqrt(sum(x**2))
-    write(2,*) 'Error Relative x_GEPP - x_GE / x_GEPP is :', error_relative
+    error_relative  = abs(backward_error_ge - backward_error)/max(abs(backward_error),abs(backward_error_ge))
+    write(2,*) 'GEPP Backward error                    is :', backward_error
+    write(2,*) 'GEPP Root Mean Square                  is :', rmse
+    write(2,*) 'Relative Backward error                is :', error_relative
     deallocate(e,x,x_ge)
 !    
 close(2)

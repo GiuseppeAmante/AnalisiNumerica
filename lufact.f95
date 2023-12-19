@@ -2,21 +2,22 @@ subroutine lufact(A,n,response_A,L_np,U_np)
     implicit none
     real(kind=8), dimension(n,n) :: A
     real(kind=8), dimension(n,n), intent(out) :: L_np, U_np
-    reaL(kind=8), allocatable :: L(:,:), U(:,:), copy(:,:), copy_copy(:,:),&
-        test(:,:), ALU(:,:), A_k(:,:), g_k(:), work(:)
+    integer :: n
+!    
+    reaL(kind=8), allocatable :: L(:,:), U(:,:), copy_1(:,:), copy_2(:,:),&
+                                 work(:)
     integer, allocatable :: iwork(:)
     real(kind=8) :: g, val_1, val_2, val_3, val_4, mach_precision,&
-       norm_matrix_1, norm_matrix_2, nrb_error, value_min, diff, max_diff,&
-       rcond
-    integer :: n, i, j, k, ierr, info
-    integer, dimension(n) :: ipiv
+                    norm_matrix_1, norm_matrix_2, nrb_error,&
+                    value_min, diff, max_diff, rcond, soglia_pivot
+    integer :: i, j, k, ierr, info, ipivot
     real(kind=8), parameter :: zero = 0.0d0, one=1.0d0
     character(len=10) :: response_A 
     character(len=30) :: response
-    logical :: pivot_null, machine_prec, no_lufact
-    real(kind=8), external :: dlange
-
+    logical :: no_lufact
+!
     no_lufact = .false.
+    ipivot= 1
 !    
 open(unit=1, file='lufact.txt', status='replace', action='write', iostat=ierr)
   if (ierr .ne. 0) then
@@ -24,48 +25,52 @@ open(unit=1, file='lufact.txt', status='replace', action='write', iostat=ierr)
     stop
   endif
 !
-!START: FACTORIZATION LU
+!START: FACTORIZATION LU without pivoting
 !
-    write(*,'(A)') 'Welcome to LU factorization without pivoting.'
-    write(1,'(A)') 'Welcome to LU factorization without pivoting.'
-    allocate(L(n,n),U(n,n))
     mach_precision = epsilon(1.0d0)
-    g = zero
+    !soglia_pivot   = epsilon(1.0d0)*10.0d0
+    soglia_pivot   = zero
+    write(*,'(A)') 'Welcome to LU factorization without pivoting.'
+    write(1,'(A)') '====================================================================='
+    write(1,'(A)') '                 LU factorization without pivoting'
+    write(1,'(A)') '====================================================================='
+    allocate(L(n,n),U(n,n))
+    !call print_matrix(1,A,n,n,response_A)
     L = zero
-    U = zero
-    call print_matrix(1,A,n,n,response_A)
-    !call diagdom(1,A,n)
-    allocate (copy(n,n))
-    copy = A
+    U = A
 !
-    outer_loop: do k = 1, n
+    outer_loop: do k = 1, n-1
       L(k, k) = one
 ! control: pivot
-      if (A(k,k).eq.zero) then
-        write(*,'(A)') 'Error : found null pivot'
+      if (abs(U(k,k)) < soglia_pivot) then
+        write(*,'(A)') 'Error : found null pivot !'
+        write(1,'(A)') 'Error : found null pivot !'
+        no_lufact= .true.
+        ipivot = 0
         exit outer_loop 
       endif 
-      if (k .eq. n) write(1,'(A)') 'Pivot control passed.' 
+      if (k .eq. n-1) write(1,'(A)') 'Pivot Control: passed !' 
       do i = k+1, n
-        L(i,k) = A(i,k) / A(k,k)
+        L(i,k) = U(i,k) / U(k,k)
+        write(1,*) 'L', L(i,k)
+        write(1,*) 'A_kk^k', U(k,k)
 ! control: machine precision
-        !if (abs(L(i,k)) < mach_precision) then  ERRORE
-        !if (abs(A(k,k)) < mach_precision) then
-        !  write(*,'(A)') 'Error : Division by a quantity smaller than machine precision'
-        !  no_lufact= .true.
-        !  exit outer_loop
-        !endif
-    enddo
-      if (k .eq. n) write(1,'(A)') 'Control on machine precision value passed.' 
-      do j = k, n
-        U(k,j) = A(k,j)
+        if (abs(U(k,k)) < mach_precision) then 
+          write(*,'(A)') 'Error : Division by a quantity smaller than machine precision'
+          write(1,'(A)') 'Error : Division by a quantity smaller than machine precision'
+          no_lufact= .true.
+          exit outer_loop
+        endif
+        if (k .eq. n-1) write(1,'(A)') 'Control on machine precision value: passed !' 
+        U(i,k+1:n) = U(i,k+1:n) - L(i,k) * U(k,k+1:n)
       enddo
-      do i = k+1, n
-        do j = k+1, n
-          A(i,j) = A(i,j) - L(i,k)*U(k,j)
-        enddo
-      enddo
-    end do outer_loop
+    enddo outer_loop
+    L(n,n) = one
+    do i = 1, n
+       do j = 1, i-1
+           U(i,j) = zero
+       enddo
+   enddo
 !
 !! 
 !   
@@ -73,143 +78,79 @@ open(unit=1, file='lufact.txt', status='replace', action='write', iostat=ierr)
 !    
     if (no_lufact) then
       write(*,'(A)') 'LU factorization without pivoting: failed !'
+      write(1,'(A)') 'LU factorization without pivoting: failed !'
+      if (ipivot == 0) write(1,'(A)') '                      due to a null pivot.' 
     else    
       write(*,'(A)') 'LU factorization without pivoting: successful !'
-      response = 'Lower Triangular'
-      call print_matrix(1,L,n,n,response)
+      write(1,'(A)') 'LU factorization without pivoting: successful !'
+      !response = 'Lower Triangular'
+      !call print_matrix(1,L,n,n,response)
       L_np = L
-      response = 'Upper Triangular'
-      call print_matrix(1,U,n,n,response)
+      !response = 'Upper Triangular'
+      !call print_matrix(1,U,n,n,response)
       U_np = U
 !  growth factor g = max( G ) / max( |A| ) where G = |L| x |U|
       val_1 = maxval(abs(L)) 
       val_2 = maxval(abs(U)) 
       val_3 = val_1*val_2
-      val_4 = maxval(abs(copy))
+      val_4 = maxval(abs(A))
       write(1,*) 'Maxval matrix G = |L| x |U|               :', val_3
       write(1,*) 'Maxval matrix |A|                         :', val_4
-      if ( val_4 < mach_precision ) then
-        write(1,'(A)') 'Error : Division by a quantity smaller than machine precision for GROWTH FACTOR'
-      else
-        g = val_3/val_4
-        write(1,*) 'Growth factor (without pivoting) is       :', g
-      endif
+      g = val_3/val_4
+      write(1,*) 'Growth factor (without pivoting) is       :', g
 ! A - LU
-      allocate (test(n,n), ALU(n,n))
-      test = zero
-      ALU = zero
-      call dgemm('n','n',n,n,n,one,L,n,U,n,zero,test,n)
-      !response = 'A'
-      !call print_matrix(1,copy,n,n,response)
-      !response = 'LU'
-      !call print_matrix(1,test,n,n,response)
-      ALU = copy - test
-      !response = 'A - LU'
-      !call print_matrix(1,ALU,n,n,response)
-      deallocate(test)
+      allocate (copy_1(n,n), copy_2(n,n))
+      copy_1 = zero
+      copy_2 = zero
+      !copy_1 = L x U
+      call dgemm('n','n',n,n,n,one,L,n,U,n,zero,copy_1,n)
+      !copy_2 = A - LU
+      copy_2 = A - copy_1
+      deallocate(copy_1)
 ! normwise relative backward error
-      call norm_inf_matrix(ALU,n,n,norm_matrix_1)
+      call norm_inf_matrix(copy_2,n,n,norm_matrix_1)
       write(1,*) 'Norm inf A - LU                           :', norm_matrix_1
-      !
-      allocate(work(n))
-      work = zero
-      norm_matrix_1 = zero
-      norm_matrix_1 = dlange('i',n,n,ALU,n,work)
-      write(1,*) 'Norm inf A - LU  [LAPACK]                 :', norm_matrix_1
-      !do i =1, n
-      !    write(1,*) work(i)
-      !enddo  
-      deallocate(work)
-      !
-      call norm_inf_matrix(copy,n,n,norm_matrix_2) 
+      call norm_inf_matrix(A,n,n,norm_matrix_2) 
       write(1,*) 'Norm inf A                                :', norm_matrix_2
-      !
-      allocate(work(n))
-      work = zero
-      norm_matrix_2 = zero
-      norm_matrix_2 = dlange('i',n,n,copy,n,work)
-      write(1,*) 'Norm inf A  [LAPACK]                 :', norm_matrix_2
-      !do i =1, n
-      !    write(1,*) work(i)
-      !enddo  
-      deallocate(work)
-      !
-      if ( norm_matrix_2 < mach_precision ) then
-        write(1,'(A)') 'Error : Division by a quantity smaller than machine precision for NORWISE RELATIVE BACKWARD ERROR'
-      else
-        nrb_error = norm_matrix_1/norm_matrix_2 
-        write(1,*) 'Normwise relative backward error (without pivoting) is :',  nrb_error
-      endif
+      nrb_error = norm_matrix_1/norm_matrix_2 
+      write(1,*) 'Normwise relative backward error (without pivoting) is :',  nrb_error
 ! TEST   
       max_diff = zero
       do i = 1, n
         do j = 1, n
-          diff = abs(ALU(i,j))
+          diff = abs(copy_2(i,j))
           if (diff > max_diff) max_diff = diff
         end do
       end do
-      deallocate(ALU)
-  ! Soglia (ad esempio, 1e-10)
+      deallocate(copy_2)
       value_min = 1e-10
-  ! Valuta se la differenza fra il valore assoluto di A-LU e la soglia è accettabile
       if (max_diff < value_min) then
         write(*, '(A)') "LU factorization without pivoting is acceptable."
       else
         write(*, '(A)') "LU factorization without pivoting is not acceptable."
-      end if
+      endif
     endif
+    deallocate(L,U)
     write(1,'(A)') 'Goodbye from factorization LU without pivoting' 
     write(*,'(A)') 'Goodbye from factorization LU without pivoting' 
 !
-!END: FACTORIZZATION LU
-!
-    write(*,'(A)') 'Welcome from Analysis step by step LU factotization' 
-    write(1,'(A)') '====================================================================='
-    write(1,'(A)') '                 ANALYSIS STEP BY STEP LU FACTORIZATION'
-    write(1,'(A)') '====================================================================='
-!
-    allocate(g_k(n-1),A_k(n,n))
-    A_k = zero
-    g_k = zero
-    pivot_null = .FALSE.
-    machine_prec = .FALSE.
-    outer_loop_2: do k = 1, n-1
-      call lu_step(k,n,copy,pivot_null,machine_prec,A_k)
-      if (pivot_null) then
-        write(*,*) 'Null Pivot Found at Step', k
-        exit outer_loop_2
-      elseif (machine_prec) then
-        write(1,*) 'Error at Step', k, 'Division by a quantity smaller than machine precision'
-        write(*,*) 'Error at Step', k, 'Division by a quantity smaller than machine precision'
-        exit outer_loop_2
-      else
-        val_1 = maxval(abs(A_k))
-        write(1,*) 'at Step', k, '  max|A_k|     is:', val_1
-        val_2 = maxval(abs(copy))
-        write(1,*) 'at Step', k, '  max|A|       is:', val_2
-        g = val_1 / val_2
-        write(1,*) 'at Step', k, '  growth factor  :', g
-        g_k(k) = g
-      endif
-    enddo outer_loop_2
-    deallocate(g_k,A_k)
-    write(*,'(A)') 'Goodbye from Analysis step by step LU factotization' 
+!END: FACTORIZZATION LU without pivoting
 !
 !  LAPACK: DGETRF computes an LU factorization of a general M-by-N matrix A using partial pivoting with row interchanges.
-
 !
     write(*,'(A)') 'Welcome from LAPACK: LU factorization with partial pivoting' 
     write(1,'(A)') '====================================================================='
     write(1,'(A)') '           LAPACK: LU factorization with partial pivoting'
     write(1,'(A)') '====================================================================='
+    allocate(L(n,n),U(n,n))
     L = zero
     U = zero
 !
     !call print_matrix(1,copy,n,n,response_A)
 !
-    allocate(copy_copy(n,n))
-    copy_copy = copy
-    call dgetrf(n, n, copy, n, ipiv, info)
+    allocate(copy_1(n,n),iwork(n))
+    copy_1 = A
+    call dgetrf(n,n,copy_1,n,iwork,info)
     if (info .ne. 0) then
       write(1,'(A)') 'LU factorization with partial pivoting [LAPACK] : failed !'
       stop
@@ -217,13 +158,13 @@ open(unit=1, file='lufact.txt', status='replace', action='write', iostat=ierr)
     do i = 1, n
       L(i, i) = one
       do j = 1, i - 1
-        L(i, j) = copy(i, j)
+        L(i, j) = copy_1(i, j)
       enddo
       do j = i, n
-        U(i, j) = copy(i, j)
+        U(i, j) = copy_1(i, j)
       enddo
     enddo
-    deallocate(copy)
+    deallocate(copy_1,iwork)
 !
     !response = 'Lower Triangular [LAPACK]'
     !call print_matrix(1,L,n,n,response)
@@ -232,68 +173,36 @@ open(unit=1, file='lufact.txt', status='replace', action='write', iostat=ierr)
 !    
 !growth factor g = max( |U| ) / max( |A| )
     val_1 = maxval(abs(U))
-    val_2 = maxval(abs(copy_copy))
+    val_2 = maxval(abs(A))
     write(1,*) 'Maxval matrix |U|                         :', val_1
     write(1,*) 'Maxval matrix |A|                         :', val_2
     g = val_1/val_2
-    if ( g < mach_precision ) then
-       write(1,'(A)') 'Error : Division by a quantity smaller than machine precision for GROWTH FACTOR'
-       write(*,'(A)') 'Error : Division by a quantity smaller than machine precision for GROWTH FACTOR'
-    else
-       write(1,*) 'Growth factor (with partial pivoting)  is :', g
-    endif
+    write(1,*) 'Growth factor (with partial pivoting)  is :', g
 !A - LU
-    allocate (test(n,n), ALU(n,n))
-    test = zero
-    ALU = zero
-    call dgemm('n','n',n,n,n,one,L,n,U,n,zero,test,n)
-    ALU = copy_copy - test
-    deallocate(test)
+    allocate (copy_1(n,n), copy_2(n,n))
+    copy_1 = zero
+    copy_2 = zero
+    call dgemm('n','n',n,n,n,one,L,n,U,n,zero,copy_1,n)
+    copy_2 = A - copy_1
+    deallocate(copy_1,L,U)
 !normwise relative backward error
-    call norm_inf_matrix(ALU,n,n,norm_matrix_1)
+    call norm_inf_matrix(copy_2,n,n,norm_matrix_1)
     write(1,*) 'Norm inf A - LU                           :', norm_matrix_1
-    !
-    allocate(work(n))
-    work = zero
-    norm_matrix_1 = zero
-    norm_matrix_1 = dlange('i',n,n,ALU,n,work)
-    write(1,*) 'Norm inf A - LU  [LAPACK]                 :', norm_matrix_1
-    !do i =1, n
-    !    write(1,*) work(i)
-    !enddo  
-    deallocate(work)
-    deallocate(ALU)
-    !
-    call norm_inf_matrix(copy_copy,n,n,norm_matrix_2) 
+    deallocate(copy_2)
+    call norm_inf_matrix(A,n,n,norm_matrix_2) 
     write(1,*) 'Norm inf A                                :', norm_matrix_2
-    !
-    allocate(work(n))
-    work = zero
-    norm_matrix_2 = zero
-    norm_matrix_2 = dlange('i',n,n,copy_copy,n,work)
-    write(1,*) 'Norm inf A  [LAPACK]                      :', norm_matrix_2
-    !do i =1, n
-    !    write(1,*) work(i)
-    !enddo  
-    deallocate(work)
-    !
-!NORMWISE RELATIVE BACKWARD ERROR
-    if ( norm_matrix_2 < mach_precision ) then
-       write(1,'(A)') 'Error : Division by a quantity smaller than machine precision for NORWISE RELATIVE BACKWARD ERROR'
-    else
-       nrb_error = norm_matrix_1 / norm_matrix_2 
-       write(1,*) 'Normwise relative backward error (with partial pivoting)   is : ', nrb_error
-    endif
+    nrb_error = norm_matrix_1 / norm_matrix_2 
+    write(1,*) 'Normwise relative backward error (with partial pivoting)   is : ', nrb_error
 !CONDITION NUMBER    
 ! The reciprocal of the condition number of the matrix A, computed as RCOND = 1/(norm(A) * norm(inv(A)))
     allocate(work(4*n),iwork(n))
     work = zero
     iwork = 0
-    call dgecon('I',n,copy_copy,n,norm_matrix_2,rcond,work,iwork,info)
+    call dgecon('I',n,A,n,norm_matrix_2,rcond,work,iwork,info)
     if (info .ne. 0) write(1,'(A)') 'Condition number computation : failed !'
     write(1,*) 'Reciprocal of the condition number of the matrix ', response_A, 'is :', rcond
     deallocate(work, iwork)
-    deallocate(L, U, copy_copy)
     write(*,'(A)') 'Goodbye from LAPACK: LU factorization with partial pivoting' 
+    write(1,'(A)') 'Goodbye from LAPACK: LU factorization with partial pivoting' 
 close(1)
     end subroutine

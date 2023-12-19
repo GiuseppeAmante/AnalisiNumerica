@@ -1,6 +1,6 @@
- GE Euclidean Norm of the Error (x - e) is :   2.4806921037926198E+017
- GE Root Mean Square (x - e)            is :   32025597350190192.     
+ GE Root Mean Square                    is :   2.2186081723058315     
+ GE Backward error                      is :  0.55172413793103448     
  The Linear Equation System: successful !
- GEPP Euclidean Norm of the Error (x - e)   is :   35.429801485943059     
- GEPP Root Mean Square (x - e)              is :   4.5739677038164093     
- Error Relative x_GEPP - x_GE / x_GEPP is :   6576659957088973.0     
+ GEPP Backward error                    is :  0.10344827586206896     
+ GEPP Root Mean Square                  is :  0.31622776601683794     
+ Relative Backward error                is :  0.81250000000000000     
