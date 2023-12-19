@@ -29,10 +29,10 @@ subroutine lu_step(step,n,A,pivot_null,machine_prec,A_k)
       do i = k + 1, n
         M(i, k) = A_k(i, k) / A_k(k, k)
 !control: machine precision        
-        if ( abs(A_k(k,k)) < mach_precision ) then 
-          machine_prec = .TRUE.
-          exit 
-        endif
+        !if ( abs(A_k(k,k)) < mach_precision ) then 
+        !  machine_prec = .TRUE.
+        !  exit 
+        !endif
         do j = k, n
           A_k(i, j) = A_k(i, j) - M(i, k) * A_k(k, j)
         end do
@@ -40,11 +40,11 @@ subroutine lu_step(step,n,A,pivot_null,machine_prec,A_k)
       A_step(:, :, k) = A_k
     end do 
 
-    !write(1,*)  '---Matrix that composes A---'
-    !do k = 1, step
-    !  do i = 1, n
-    !    write(1,*) (A_step(i,j,k), j =1,n)
-    !  enddo
-    !  write(1,*) '----------------------------'
-    !enddo
+    write(1,*)  '---Matrix that composes A---'
+    do k = 1, step
+      do i = 1, n
+        write(1,*) (A_step(i,j,k), j =1,n)
+      enddo
+      write(1,*) '----------------------------'
+    enddo
 end subroutine

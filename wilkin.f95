@@ -2,9 +2,9 @@ subroutine wilkin(n,matrix)
     implicit none
     real(kind=8), dimension(n,n) :: matrix
     integer :: n, i , j, ierr, info
-    real(kind=8) :: error_norm, rmse
+    real(kind=8) :: error_norm, rmse, mach_precision, s, error_relative
     character(len=30) :: type_matrix
-    real(kind=8), allocatable :: e(:), x(:) 
+    real(kind=8), allocatable :: e(:), b(:), y(:), x(:), L(:,:), U(:,:), x_ge(:)
     integer, allocatable :: pivots(:)
     real(kind=8), parameter :: zero = 0.0d0, one=1.0d0
 !
@@ -13,6 +13,7 @@ open(unit=2, file='wilkin.txt', status='replace', action='write', iostat=ierr)
     write (*,'(A)') 'Error:  open the file wilkin.txt !'
     stop
   endif
+   mach_precision= epsilon(1.0d0)
 !  Generate the nxn Wilkinson matrix
     matrix= zero
     do i = 1, n
@@ -26,10 +27,78 @@ open(unit=2, file='wilkin.txt', status='replace', action='write', iostat=ierr)
     enddo
 !
     type_matrix = 'Wilkinson'
-    call print_matrix(2,matrix,n,n,type_matrix)
+    !call print_matrix(2,matrix,n,n,type_matrix)
 !
 ! Numerical experiment
 !
+    allocate(e(n),b(n),y(n),x(n),L(n,n),U(n,n))
+    e = one
+    b = zero
+    y = zero
+    x = zero
+    L = zero
+    U = zero
+!A=LU
+    call lufact(matrix,n,type_matrix,L,U)
+    !type_matrix = 'Lower Triangular'
+    !call print_matrix(2,L,n,n,type_matrix)
+    !type_matrix = 'Upper Triangular'
+    !call print_matrix(2,U,n,n,type_matrix)
+!Ly=b
+    call dgemv('n',n,n,one,matrix,n,e,1,zero,b,1)
+    !y = b
+    !deallocate(b)
+    !do i = 1, n-1
+    !    y(i) = y(i) / L(i,i)
+    !    y(i+1:n) = y(i+1:n) - y(i) * L(i+1:n,i)
+    !enddo
+    !y(n) = y(n) / L(n,n)
+y(1) = b(1)
+do i = 2, n
+  s = zero
+  do j = 1, i-1
+    s = s + L(i, j) * y(j)
+  end do
+  y(i) = b(i) - s
+end do
+deallocate(b)
+!Ux=y  
+    !x = y
+    !deallocate(y)
+    !outler_loop: do i = n,1,-1
+    !  if (abs( U(i,i) ) < mach_precision) then
+    !    write(2,'(A)') 'Error: Division by a quantity smaller than machine precision for Ux=y'    
+    !    exit outler_loop
+    !  else
+    !      x(i) = x(i) / U(i,i)
+    !  endif
+    !  x(1:i-1) = x(1:i-1) - x(i) * U(1:i-1,i)
+    !enddo outler_loop
+x(n) = y(n) / U(n,n)
+do i = n-1,1,-1
+  s=zero
+  do j = i+1, n
+    s = s + U(i,j) * x(j)
+  enddo
+  x(i) = (y(i)-s) / U(i,i)
+enddo
+deallocate(y)
+!
+!!
+!    
+    !write(2,'(A)') 'Solution W_n x = b '
+    !do i = 1, n 
+    !  write(2,*) x(i)
+    !enddo 
+    deallocate(L,U)
+    error_norm = sqrt( sum((x-e)**2) )
+    rmse = sqrt( sum( (x-e)**2 ) / real(n) )
+    write(2,*) 'GE Euclidean Norm of the Error (x - e) is :', error_norm
+    write(2,*) 'GE Root Mean Square (x - e)            is :', rmse
+    allocate(x_ge(n))
+    x_ge = x
+    deallocate(e,x)
+    !
     allocate(e(n),x(n))
     e = one
     x = zero
@@ -41,11 +110,17 @@ open(unit=2, file='wilkin.txt', status='replace', action='write', iostat=ierr)
     else
         write(2,'(A)') 'Error : The System of equations has not been solved !'
     endif
-    error_norm = sqrt(sum((e - x)**2))
-    rmse = sqrt(sum((e - x)**2) / real(n))
-    write(2,*) 'Euclidean Norm of the Error (e - x) is : ', error_norm
-    write(2,*) 'Root Mean Square (x - e)            is : ', rmse
-    deallocate(e,x)
+    !write(2,'(A)') 'Solution W_n x = b '
+    !do i = 1, n 
+    !  write(2,*) x(i)
+    !enddo 
+    error_norm = sqrt( sum((x-e)**2) )
+    rmse = sqrt( sum( (x-e)**2 ) / real(n, kind=8) )
+    write(2,*) 'GEPP Euclidean Norm of the Error (x - e)   is :', error_norm
+    write(2,*) 'GEPP Root Mean Square (x - e)              is :', rmse
+    error_relative = sqrt(sum((x-x_ge)**2)) / sqrt(sum(x**2))
+    write(2,*) 'Error Relative x_GEPP - x_GE / x_GEPP is :', error_relative
+    deallocate(e,x,x_ge)
 !    
 close(2)
 end subroutine

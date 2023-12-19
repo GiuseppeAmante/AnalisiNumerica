@@ -2,7 +2,7 @@
     real(8), intent(in) :: matrix(m,n)
     integer, intent(in) :: val_unit, m, n
     integer :: i, j
-    character(len=30) :: type_matrix
+    character(len=10) :: type_matrix
 !    
 100 format('***********************************************************',a)
 101 format('                       M A T R I X                         ',a)

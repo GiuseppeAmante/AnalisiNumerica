@@ -1,6 +1,6 @@
 program main
       implicit none
-      real(kind= 8), allocatable :: matrix_a(:,:)
+      real(kind= 8), allocatable :: matrix_a(:,:), L(:,:), U(:,:)
       integer :: n, n_wilkin, success, i, j
       character(len=3) :: response
       character(len=10) :: type_matrix, problem
@@ -43,18 +43,20 @@ program main
           read (*,*) n
           allocate(matrix_a(n,n)) 
           call generation_matrix(matrix_a,n,type_matrix)
-        endif     
-        call lufact(matrix_a,n,type_matrix)
-        deallocate(matrix_a)
+        endif
+        allocate(L(n,n),U(n,n))     
+        call lufact(matrix_a,n,type_matrix,L,U)
+        deallocate(matrix_a,L,U)
+        write(*,*) 'Problem 1: Resolved !'
 !END:1
       elseif (trim(problem) == 'Problem2') then  
 !START 2
-        write(*,*) 'Problem 2 :'
         write(*,*) 'What is the size of the matrix Wilkinson?'
         read(*,*) n_wilkin
         allocate(matrix_a(n_wilkin,n_wilkin))
         call wilkin(n_wilkin,matrix_a)
         deallocate(matrix_a)
+        write(*,*) 'Problem 2: Resolved !'
 !END:2      
       else 
         write(*,*) 'Ok, Goodbye !'
