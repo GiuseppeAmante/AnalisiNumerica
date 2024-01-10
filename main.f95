@@ -1,21 +1,24 @@
 program main
       implicit none
       real(kind= 8), allocatable :: matrix_a(:,:), L(:,:), U(:,:)
-      integer :: n, n_wilkin, success, i, j
+      integer :: n, n_wilkin, success, i, j, n_project
       character(len=3) :: response
       character(len=10) :: type_matrix, problem
 !   
-      write(*,*) 'Welcome to my program, I am Giuseppe Amante. '
-      write(*,*) 'This program solves exercises on linear system solutions (NLA Homework Project 1)'
+write(*,*) 'Welcome to my program, I am Giuseppe Amante. '
+  write(*,*) 'To which Numerical Algebra Home Project are you referring?[1 or 2]'
+  read (*,*) n_project
+  if (n_project .eq. 1) then
+      write(*,*) 'This program solves exercises on linear system solutions'
       write(*,*) 'Starting !'
 !START:1      
-      write(*,*) 'Which issue would you like me to address? [Problem1 or Problem2]'
+      write(*,*) 'Which issue would you like me to address?[Problem1 or Problem2]'
       read(*,*) problem
       if (trim(problem) == 'Problem1' ) then
-        write(*,*) 'Do you have a matrix available? [yes, no]'
+        write(*,*) 'Do you have a matrix available?[yes, no]'
         read(*,*) response
         if (trim(response) == 'yes') then
-          write(*,*) "Enter the name of the file containing the matrix (make sure it is square) :"
+          write(*,*) "Enter the name of the file containing the matrix (make sure it is square):"
           read(*,*) type_matrix
           open(unit=10, file=trim(type_matrix), status='old', action='read', iostat=success)
           if (success .ne. 0) then
@@ -61,4 +64,9 @@ program main
       else 
         write(*,*) 'Ok, Goodbye !'
       endif
+  else if (n_project .eq. 2) then 
+    call intpol
+  else 
+    write(*,*) 'I apologize, but this project is not present in my code.'
+  endif
       end program 

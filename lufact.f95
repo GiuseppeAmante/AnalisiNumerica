@@ -9,7 +9,8 @@ subroutine lufact(A,n,response_A,L_np,U_np)
     integer, allocatable :: iwork(:)
     real(kind=8) :: g, val_1, val_2, val_3, val_4, mach_precision,&
                     norm_matrix_1, norm_matrix_2, nrb_error,&
-                    value_min, diff, max_diff, rcond, soglia_pivot
+                    value_min, diff, max_diff, rcond, soglia_pivot,&
+                    threshold_lower, threshold_upper
     integer :: i, j, k, ierr, info, ipivot
     real(kind=8), parameter :: zero = 0.0d0, one=1.0d0
     character(len=10) :: response_A 
@@ -27,9 +28,11 @@ open(unit=1, file='lufact.txt', status='replace', action='write', iostat=ierr)
 !
 !START: FACTORIZATION LU without pivoting
 !
-    mach_precision = epsilon(1.0d0)
-    !soglia_pivot   = epsilon(1.0d0)*10.0d0
-    soglia_pivot   = zero
+    mach_precision  = epsilon(1.0d0)
+    soglia_pivot    = 10.0d0*mach_precision
+    threshold_lower = mach_precision
+    threshold_upper = 1.0d0/mach_precision
+
     write(*,'(A)') 'Welcome to LU factorization without pivoting.'
     write(1,'(A)') '====================================================================='
     write(1,'(A)') '                 LU factorization without pivoting'
@@ -52,10 +55,8 @@ open(unit=1, file='lufact.txt', status='replace', action='write', iostat=ierr)
       if (k .eq. n-1) write(1,'(A)') 'Pivot Control: passed !' 
       do i = k+1, n
         L(i,k) = U(i,k) / U(k,k)
-        write(1,*) 'L', L(i,k)
-        write(1,*) 'A_kk^k', U(k,k)
 ! control: machine precision
-        if (abs(U(k,k)) < mach_precision) then 
+        if (abs(L(i,k)) < threshold_lower .or. abs(L(i,k)) > threshold_upper ) then 
           write(*,'(A)') 'Error : Division by a quantity smaller than machine precision'
           write(1,'(A)') 'Error : Division by a quantity smaller than machine precision'
           no_lufact= .true.
@@ -126,8 +127,10 @@ open(unit=1, file='lufact.txt', status='replace', action='write', iostat=ierr)
       value_min = 1e-10
       if (max_diff < value_min) then
         write(*, '(A)') "LU factorization without pivoting is acceptable."
+        write(1, '(A)') "LU factorization without pivoting is acceptable."
       else
         write(*, '(A)') "LU factorization without pivoting is not acceptable."
+        write(1, '(A)') "LU factorization without pivoting is acceptable."
       endif
     endif
     deallocate(L,U)
