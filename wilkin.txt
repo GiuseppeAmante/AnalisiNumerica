@@ -1,6 +1,0 @@
- GE Root Mean Square                    is :   2.2186081723058315     
- GE Backward error                      is :  0.55172413793103448     
- The Linear Equation System: successful !
- GEPP Backward error                    is :  0.10344827586206896     
- GEPP Root Mean Square                  is :  0.31622776601683794     
- Relative Backward error                is :  0.81250000000000000     
